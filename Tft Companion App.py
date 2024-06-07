@@ -46,74 +46,70 @@ window = ttk.Window(themename='darkly')
 window.title('Tft Companion App')
 window.geometry('1980x1080')
 
-# Create the main frame
-main_frame = ttk.Frame(master=window)
-main_frame.pack()
+# Create a notebook to switch between different pages
+notebook = ttk.Notebook(window)
+notebook.pack(expand=True, fill='both')
 
-# Create label prompting user to enter trait name
-label = ttk.Label(master=window, text="Enter Trait Name:")
+# Create frames for each tab
+main_frame = ttk.Frame(notebook)
+odds_frame = ttk.Frame(notebook)
+
+notebook.add(main_frame, text="Meta Builds")
+notebook.add(odds_frame, text="TFT Odds Calculator")
+
+# Main Frame Widgets (Meta Builds)
+label = ttk.Label(main_frame, text="Enter Trait Name:")
 label.pack(pady=5)
 
-# Create entry field for trait input
-trait_entry = ttk.Entry(master=window, width=30)
+trait_entry = ttk.Entry(main_frame, width=30)
 trait_entry.pack(pady=10)
 
-# Create output text area for displaying search results
-output_text = ScrolledText(master=window, width=100, height=50, wrap=WORD)
+output_text = ScrolledText(main_frame, width=100, height=50, wrap=WORD)
 output_text.pack()
 
-# Function to search for trait and display results
 def search_trait():
     trait = trait_entry.get().lower()
     if trait in trait_names:
         results = search_trait_in_builds(trait, builds)
         output_text.delete(1.0, tk.END)
-        # Define Unicode arrow character for bullet point
-        bullet_point = "\u2192"  # Arrow point character (→)
+        bullet_point = "\u2192"
 
         if results:
             for i, result in enumerate(results):
                 output_text.insert(tk.END, f"Build {i+1}:\n", 'title')
-                output_text.insert(tk.END, "\n")  # Add an empty line after the title
+                output_text.insert(tk.END, "\n")
                 output_text.insert(tk.END, f"Buildname: {result['Buildname']}\n", 'buildname_title')
                 output_text.insert(tk.END, f"Trait: {result['Trait']}\n", 'trait_title')
                 output_text.insert(tk.END, f"Difficulty: {result['Difficulty']}\n", 'difficulty_title')
                 output_text.insert(tk.END, f"Rank: {result['Rank']}\n", 'rank_title')
                 
-                # Group related information together
                 champion_list = result['Champions'].split(',')
                 item_list = result['Items'].split(',')
                 augment_list = result['Augments'].split(',')
                 step_list = result['Steps'].split(',')
 
-                # Insert champions
                 output_text.insert(tk.END, "Champions:\n", 'champions_title')
                 for champion in champion_list:
                     output_text.insert(tk.END, f"{bullet_point} {champion.strip()}\n")
 
-                # Insert items
                 output_text.insert(tk.END, "Items:\n", 'items_title')
                 for item in item_list:
                     output_text.insert(tk.END, f"{bullet_point} {item.strip()}\n")
 
-                # Insert augments
                 output_text.insert(tk.END, "Augments:\n", 'augments_title')
                 for augment in augment_list:
                     output_text.insert(tk.END, f"{bullet_point} {augment.strip()}\n")
 
-                # Insert steps
                 output_text.insert(tk.END, "Steps:\n", 'steps_title')
                 for step in step_list:
                     output_text.insert(tk.END, f"{bullet_point} {step.strip()}\n")
 
-                # Add separator between builds
                 if i < len(results) - 1:
                     output_text.insert(tk.END, "\n" + "-" * 80 + "\n\n")
 
         else:
             output_text.insert(tk.END, f"No builds found for trait '{trait}'.")
 
-        # Define text styles with colors for titles only
         output_text.tag_configure('title', font=('Helvetica', 12, 'bold'), underline=True)
         output_text.tag_configure('buildname_title', font=('Helvetica', 10, 'bold'))
         output_text.tag_configure('trait_title', font=('Helvetica', 10, 'bold'))
@@ -124,29 +120,91 @@ def search_trait():
         output_text.tag_configure('augments_title', font=('Helvetica', 10, 'bold'), foreground='cyan')
         output_text.tag_configure('steps_title', font=('Helvetica', 10, 'bold'), foreground='magenta')
 
-
     else:
         output_text.delete(1.0, tk.END)
         output_text.insert(tk.END, f"'{trait}' is not a valid trait name.")
 
-# Create search button
-search_button = ttk.Button(master=window, text="Search", command=search_trait, state='disabled')
+search_button = ttk.Button(main_frame, text="Search", command=search_trait, state='disabled')
 search_button.pack(pady=10)
 
-# Function to enable/disable search button based on entry field input
 def check_entry(event):
     if trait_entry.get():
         search_button['state'] = 'normal'
     else:
         search_button['state'] = 'disabled'
 
-# Bind event to check for entry field input
 trait_entry.bind('<KeyRelease>', check_entry)
 
-# Make the columns and rows expandable
-for i in range(2):
-    main_frame.columnconfigure(i, weight=1)
-main_frame.rowconfigure(1, weight=1)
+# TFT Odds Calculator Widgets (Odds Frame)
+odds_label_level = ttk.Label(odds_frame, text="Enter Level (2-11):")
+odds_label_level.pack(pady=5)
+
+level_entry = ttk.Entry(odds_frame, width=10)
+level_entry.pack(pady=5)
+
+odds_label_cost = ttk.Label(odds_frame, text="Enter Unit Cost (1-5):")
+odds_label_cost.pack(pady=5)
+
+cost_entry = ttk.Entry(odds_frame, width=10)
+cost_entry.pack(pady=5)
+
+odds_label_purchased = ttk.Label(odds_frame, text="Enter Number of Units Purchased:")
+odds_label_purchased.pack(pady=5)
+
+purchased_entry = ttk.Entry(odds_frame, width=10)
+purchased_entry.pack(pady=5)
+
+odds_output = ScrolledText(odds_frame, width=50, height=10, wrap=WORD)
+odds_output.pack(pady=10)
+
+# Odds data
+odds_data = {
+    2: [100, 0, 0, 0, 0],
+    3: [75, 25, 0, 0, 0],
+    4: [55, 30, 15, 0, 0],
+    5: [45, 33, 20, 2, 0],
+    6: [30, 40, 25, 5, 0],
+    7: [20, 33, 36, 10, 1],
+    8: [18, 27, 32, 20, 3],
+    9: [15, 20, 25, 30, 10],
+    10: [5, 10, 20, 40, 25],
+    11: [1, 2, 12, 50, 35]
+}
+
+# Pool sizes
+pool_sizes = {
+    1: 22,
+    2: 20,
+    3: 17,
+    4: 10,
+    5: 9
+}
+
+def calculate_odds():
+    level = int(level_entry.get())
+    cost = int(cost_entry.get())
+    purchased = int(purchased_entry.get())
+
+    if 2 <= level <= 11 and 1 <= cost <= 5:
+        cost_index = cost - 1
+        base_odds = odds_data[level][cost_index] / 100
+        pool_size = pool_sizes[cost]
+        remaining_units = pool_size - purchased
+
+        if remaining_units <= 0:
+            odds_output.delete(1.0, tk.END)
+            odds_output.insert(tk.END, f"No units left in the pool for cost {cost}.")
+        else:
+            total_units = sum(pool_sizes.values())
+            hit_rate = (remaining_units / pool_size) * base_odds * 100
+            odds_output.delete(1.0, tk.END)
+            odds_output.insert(tk.END, f"At level {level}, with {purchased} units purchased, the odds of finding a {cost}-cost unit are {hit_rate:.2f}%.")
+    else:
+        odds_output.delete(1.0, tk.END)
+        odds_output.insert(tk.END, "Please enter a valid level (2-11) and cost (1-5).")
+
+calculate_button = ttk.Button(odds_frame, text="Calculate Odds", command=calculate_odds)
+calculate_button.pack(pady=10)
 
 # Start the Tkinter main loop
 window.mainloop()
