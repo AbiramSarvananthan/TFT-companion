@@ -44,8 +44,15 @@ trait_names = load_trait_names('traitNames.txt')
 # Create the main window
 window = ttk.Window(themename='darkly')
 window.title('Tft Companion App')
-window.geometry('1980x1080')
 
+# Get the screen width and height
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
+
+window.geometry(f"{screen_width}x{screen_height}")
+
+# Set the geometry of the window to fit the screen
+window.geometry(f"{screen_width}x{screen_height}")
 # Create a notebook to switch between different pages
 notebook = ttk.Notebook(window)
 notebook.pack(expand=True, fill='both')
