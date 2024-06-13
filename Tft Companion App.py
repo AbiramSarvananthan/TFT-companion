@@ -1,4 +1,3 @@
-# Import necessary modules
 import tkinter as tk
 from tkinter import *
 from tkinter.scrolledtext import ScrolledText
@@ -45,17 +44,16 @@ trait_names = load_trait_names('traitNames.txt')
 window = ttk.Window(themename='darkly')
 window.title('Tft Companion App')
 
-# Get the screen width and height
+# Get the native screen width and height
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 
+# Set the initial window size to match the native screen resolution
 window.geometry(f"{screen_width}x{screen_height}")
 
-# Set the geometry of the window to fit the screen
-window.geometry(f"{screen_width}x{screen_height}")
 # Create a notebook to switch between different pages
 notebook = ttk.Notebook(window)
-notebook.pack(expand=True, fill='both')
+notebook.pack(fill='both', expand=True)
 
 # Create frames for each tab
 main_frame = ttk.Frame(notebook)
@@ -72,7 +70,7 @@ trait_entry = ttk.Entry(main_frame, width=30)
 trait_entry.pack(pady=10)
 
 output_text = ScrolledText(main_frame, width=100, height=50, wrap=WORD)
-output_text.pack()
+output_text.pack(fill='both', expand=True, padx=10, pady=10)
 
 def search_trait():
     trait = trait_entry.get().lower()
@@ -162,7 +160,7 @@ purchased_entry = ttk.Entry(odds_frame, width=10)
 purchased_entry.pack(pady=5)
 
 odds_output = ScrolledText(odds_frame, width=50, height=10, wrap=WORD)
-odds_output.pack(pady=10)
+odds_output.pack(fill='both', expand=True, padx=10, pady=10)
 
 # Odds data
 odds_data = {
@@ -212,6 +210,20 @@ def calculate_odds():
 
 calculate_button = ttk.Button(odds_frame, text="Calculate Odds", command=calculate_odds)
 calculate_button.pack(pady=10)
+
+# Responsive Design Handling
+def on_window_resize(event):
+    # Get the new window size
+    window.update_idletasks()  # Ensure window size is updated
+    new_width = window.winfo_width()
+    new_height = window.winfo_height()
+
+    # Adjust the size of ScrolledText widgets based on new window size
+    output_text.config(width=int(new_width / 15), height=int(new_height / 30))
+    odds_output.config(width=int(new_width / 30), height=int(new_height / 60))
+
+# Bind the window resize event to the function
+window.bind('<Configure>', on_window_resize)
 
 # Start the Tkinter main loop
 window.mainloop()
